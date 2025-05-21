@@ -12,23 +12,23 @@ namespace Tanks.Complete
     // This handle both the start menu (selecting which tank each player use) and the pause menu if present
     public class GameUIHandler : MonoBehaviour
     {
-        public GameManager m_GameManager;               // Reference to the GameManager in the scene
+        public GameManager m_GameManager; // Reference to the GameManager in the scene
 
-        [Header("Start Menu")] 
-        public RectTransform m_StartMenuRoot;           // The GameObject root that is parent of the Start Menu
-        public Button m_StartButton;                    // The Button that will start the game
+        [Header("Start Menu")]
+        public RectTransform m_StartMenuRoot; // The GameObject root that is parent of the Start Menu
+        public Button m_StartButton; // The Button that will start the game
 
         [Tooltip("The slot in the UI that can be taken by a player or computer tank")]
-        public StartMenuSlot[] m_PlayerSlots;           // The Slots in the Start Menu that display the available tanks and handle players selections
+        public StartMenuSlot[] m_PlayerSlots; // The Slots in the Start Menu that display the available tanks and handle players selections
 
-        public OnScreenButton m_PauseMenuButton;        // Reference to OnScreenButton that emulate pressing a Gamepad Start button
-        
-        private TextMeshProUGUI m_StartButtonText;      // Reference to the Text on the Start Button 
-        private int m_SlotUsed = 0;                     // How many slots are currently used, the game need at least 2 to start
+        public OnScreenButton m_PauseMenuButton; // Reference to OnScreenButton that emulate pressing a Gamepad Start button
 
-        private PauseMenu m_PauseMenu;                  // Reference to the pause menu (if present in the scene)
-        private InputAction m_PauseAction;              // The InputAction that will trigger the pause menu
-        
+        private TextMeshProUGUI m_StartButtonText; // Reference to the Text on the Start Button
+        private int m_SlotUsed = 0; // How many slots are currently used, the game need at least 2 to start
+
+        private PauseMenu m_PauseMenu; // Reference to the pause menu (if present in the scene)
+        private InputAction m_PauseAction; // The InputAction that will trigger the pause menu
+
         private CanvasScaler m_CanvasScaler;
 
         private void Awake()
@@ -59,7 +59,7 @@ namespace Tanks.Complete
             m_StartButton.interactable = false;
             m_StartButtonText = m_StartButton.GetComponentInChildren<TextMeshProUGUI>();
             m_StartButtonText.text = "2 Tanks required";
-            
+
             // Disable the on screen pause button
             m_PauseMenuButton.gameObject.SetActive(false);
 
@@ -71,26 +71,27 @@ namespace Tanks.Complete
                 //clone the action so it doesn't change the default one
                 m_PauseAction = InputSystem.actions.FindAction("Pause").Clone();
                 var rectTransform = m_PauseMenuButton.GetComponent<RectTransform>();
-                //force the button to be on top of everything so it can be clicked no matter what other screen is shown 
+                //force the button to be on top of everything so it can be clicked no matter what other screen is shown
                 rectTransform.SetAsLastSibling();
             }
 
             // We use an array because the code was originally written to have any number of prefabs and player, but
             // this was fixed to always 4 tanks during development, so to avoid rewriting the code for static number,
             // we simply transform our 4 static tank prefab into an array
-            var tanksPrefabs =
-                new[]
-                {
-                    m_GameManager.m_Tank1Prefab, m_GameManager.m_Tank2Prefab, m_GameManager.m_Tank3Prefab,
-                    m_GameManager.m_Tank4Prefab
-                };
+            var tanksPrefabs = new[]
+            {
+                m_GameManager.m_Tank1Prefab,
+                m_GameManager.m_Tank2Prefab,
+                m_GameManager.m_Tank3Prefab,
+                m_GameManager.m_Tank4Prefab,
+            };
 
             // Go over all the player slots (4) and initialize them...
             for (int i = 0; i < m_PlayerSlots.Length; ++i)
             {
                 var slot = m_PlayerSlots[i];
 
-                // set the preview on the slot 
+                // set the preview on the slot
                 slot.SetTankPreview(tanksPrefabs.Length > i ? tanksPrefabs[i] : tanksPrefabs[0]);
 
                 var i1 = i;
@@ -103,7 +104,8 @@ namespace Tanks.Complete
                     bool player1Present = false;
                     for (int j = 0; j < m_PlayerSlots.Length; ++j)
                     {
-                        if (i1 == j) continue;
+                        if (i1 == j)
+                            continue;
 
                         if (m_PlayerSlots[j].PlayerControlling == 1)
                             player1Present = true;
@@ -134,8 +136,8 @@ namespace Tanks.Complete
                 {
                     slot.RemoveTank();
                     m_SlotUsed -= 1;
-                    
-                    // If after removing that tank from the used tanks we have less than 2 slots open, disable the 
+
+                    // If after removing that tank from the used tanks we have less than 2 slots open, disable the
                     // Start button and reset the text to the required warning
                     if (m_SlotUsed < 2)
                     {
@@ -153,7 +155,8 @@ namespace Tanks.Complete
                     for (int j = 0; j < m_PlayerSlots.Length; ++j)
                     {
                         var localSlot = m_PlayerSlots[j];
-                        if (localSlot.IsOpen || localSlot == slot) continue;
+                        if (localSlot.IsOpen || localSlot == slot)
+                            continue;
 
                         if (localSlot.PlayerControlling == 1)
                         {
@@ -171,7 +174,8 @@ namespace Tanks.Complete
                     for (int j = 0; j < m_PlayerSlots.Length; ++j)
                     {
                         var localSlot = m_PlayerSlots[j];
-                        if (localSlot.IsOpen || localSlot == slot) continue;
+                        if (localSlot.IsOpen || localSlot == slot)
+                            continue;
 
                         if (localSlot.PlayerControlling == 2)
                         {
@@ -181,7 +185,28 @@ namespace Tanks.Complete
                 });
 
                 // Setup the Computer control button
-                slot.m_ComputerControlButton.onClick.AddListener(() => { slot.SetPlayerControlling(-1); });
+                slot.m_ComputerControlButton.onClick.AddListener(() =>
+                {
+                    slot.SetPlayerControlling(-1);
+                });
+                // Setup the color choice button
+                slot.red_Button.onClick.AddListener(() =>
+                {
+                    slot.SetPlayerTankColor(0);
+
+                });
+                slot.green_Button.onClick.AddListener(() =>
+                {
+                    slot.SetPlayerTankColor(1);
+                });
+                slot.blue_Button.onClick.AddListener(() =>
+                {
+                    slot.SetPlayerTankColor(2);
+                });
+                slot.yellow_Button.onClick.AddListener(() =>
+                {
+                    slot.SetPlayerTankColor(3);
+                });
             }
         }
 
@@ -196,13 +221,15 @@ namespace Tanks.Complete
             {
                 if (!slot.IsOpen)
                 {
-                    playerData.Add(new GameManager.PlayerData()
-                    {
-                        TankColor = slot.m_SlotColor,
-                        IsComputer = slot.IsComputer,
-                        ControlIndex = slot.PlayerControlling,
-                        UsedPrefab = slot.TankPrefab,
-                    });
+                    playerData.Add(
+                        new GameManager.PlayerData()
+                        {
+                            TankColor = slot.m_SlotColor,
+                            IsComputer = slot.IsComputer,
+                            ControlIndex = slot.PlayerControlling,
+                            UsedPrefab = slot.TankPrefab,
+                        }
+                    );
                 }
             }
 
@@ -222,13 +249,16 @@ namespace Tanks.Complete
             // display the pause menu when pressed
             if (m_PauseMenu != null)
             {
-                m_PauseAction.performed += evt => { TogglePause(); };
+                m_PauseAction.performed += evt =>
+                {
+                    TogglePause();
+                };
                 m_PauseAction.Enable();
-                
+
                 m_PauseMenuButton.gameObject.SetActive(true);
             }
         }
-        
+
         private void TogglePause()
         {
             m_PauseMenu.TogglePause();
